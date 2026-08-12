@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Condomínio Sossego — Sorteio de Feriados entre Cotistas</title>
+    <meta
+      name="description"
+      content="Sorteio justo da ordem dos cotistas e distribuição dos feriados da chácara em snake draft. Tudo roda no seu navegador."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700;9..144,900&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --mata-950: #102519;
+        --mata-900: #173824;
+        --mata-800: #245235;
+        --mata-700: #326b47;
+        --capim: #b97816;
+        --capim-claro: #d79a32;
+        --capim-escuro: #8f5a0b;
+        --papel: #ffffff;
+        --papel-quente: #fbfaf6;
+        --texto: #183124;
+        --texto-suave: #5d6e63;
+        --erro: #a33d2a;
+        --borda: #dce5de;
+        --borda-dourada: #ead9b9;
+        --raio: 14px;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        min-height: 100vh;
+        font-family: "Space Grotesk", system-ui, sans-serif;
+        color: var(--texto);
+        background:
+          radial-gradient(
+            1000px 520px at 90% -15%,
+            rgba(50, 107, 71, 0.08),
+            transparent 60%
+          ),
+          radial-gradient(
+            800px 450px at -10% 105%,
+            rgba(185, 120, 22, 0.06),
+            transparent 55%
+          ),
+          var(--papel);
+        background-attachment: fixed;
+        line-height: 1.55;
+      }
+      /* textura sutil de capim: linhas diagonais */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        background: repeating-linear-gradient(
+          115deg,
+          transparent 0 26px,
+          rgba(23, 56, 36, 0.018) 26px 27px
+        );
+      }
+      .pagina {
+        position: relative;
+        z-index: 1;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 2rem 1.1rem 3.5rem;
+      }
+
+      /* ---------- cabeçalho ---------- */
+      header {
+        text-align: center;
+        margin-bottom: 2.2rem;
+      }
+      .selo {
+        display: inline-block;
+        font-size: 0.72rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: var(--capim);
+        border: 1px solid var(--borda-dourada);
+        border-radius: 999px;
+        padding: 0.35rem 0.9rem;
+        margin-bottom: 1.1rem;
+        background: #fffaf0;
+      }
+      h1 {
+        font-family: "Fraunces", serif;
+        font-weight: 900;
+        font-size: clamp(2.1rem, 7vw, 3.4rem);
+        line-height: 1.08;
+        letter-spacing: -0.01em;
+      }
+      h1 em {
+        font-style: italic;
+        font-weight: 600;
+        color: var(--capim-escuro);
+      }
+      .sub {
+        margin-top: 0.8rem;
+        color: var(--texto-suave);
+        font-size: 0.98rem;
+        max-width: 46ch;
+        margin-inline: auto;
+      }
+
+      /* ---------- painéis ---------- */
+      .painel {
+        background: var(--papel-quente);
+        border: 1px solid var(--borda);
+        border-radius: var(--raio);
+        padding: 1.3rem 1.2rem;
+        margin-bottom: 1.2rem;
+        box-shadow: 0 18px 42px -30px rgba(16, 37, 25, 0.28);
+      }
+      label.titulo-campo {
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+        font-family: "Fraunces", serif;
+        font-weight: 700;
+        font-size: 1.15rem;
+        margin-bottom: 0.15rem;
+      }
+      .dica {
+        font-size: 0.8rem;
+        color: var(--texto-suave);
+        margin-bottom: 0.7rem;
+      }
+      textarea {
+        width: 100%;
+        font-family: "Space Grotesk", monospace, sans-serif;
+        font-size: 0.95rem;
+        color: var(--texto);
+        background: var(--papel);
+        border: 1px solid var(--borda);
+        border-radius: 10px;
+        padding: 0.8rem 0.9rem;
+        resize: vertical;
+        min-height: 11rem;
+      }
+      textarea::placeholder {
+        color: #89968d;
+      }
+      textarea:focus-visible,
+      button:focus-visible {
+        outline: 3px solid var(--capim-claro);
+        outline-offset: 2px;
+      }
+
+      /* ---------- botões ---------- */
+      .acoes {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 0.4rem 0 1.6rem;
+      }
+      button {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        border: none;
+        border-radius: 999px;
+        padding: 0.85rem 1.9rem;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease,
+          background 0.15s ease;
+      }
+      .btn-principal {
+        background: linear-gradient(
+          135deg,
+          var(--capim-claro),
+          var(--capim) 60%,
+          var(--capim-escuro)
+        );
+        color: var(--mata-950);
+        box-shadow: 0 10px 26px -10px rgba(143, 90, 11, 0.45);
+      }
+      .btn-principal:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 30px -10px rgba(143, 90, 11, 0.58);
+      }
+      .btn-principal:active {
+        transform: translateY(0);
+      }
+      /* ---------- avisos ---------- */
+      .alerta {
+        border: 1px solid #e5b1a7;
+        background: #fff4f1;
+        color: var(--erro);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+      .alerta[hidden] {
+        display: none;
+      }
+      .aviso-rodada {
+        border: 1px solid var(--borda-dourada);
+        background: #fff9ed;
+        color: #765016;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.88rem;
+        margin: 0 0 1.2rem;
+      }
+
+      /* ---------- resultados ---------- */
+      #resultados[hidden] {
+        display: none;
+      }
+      .secao-titulo {
+        font-family: "Fraunces", serif;
+        font-weight: 700;
+        font-size: 1.45rem;
+        margin: 2.2rem 0 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+      }
+      .secao-titulo::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--borda);
+      }
+
+      /* ordem sorteada */
+      .ordem {
+        list-style: none;
+        counter-reset: pos;
+        display: grid;
+        gap: 0.55rem;
+      }
+      .ordem li {
+        counter-increment: pos;
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        background: var(--papel);
+        border: 1px solid var(--borda);
+        border-radius: 12px;
+        padding: 0.7rem 1rem;
+      }
+      .ordem li::before {
+        content: counter(pos);
+        font-family: "Fraunces", serif;
+        font-weight: 900;
+        font-size: 1.15rem;
+        color: var(--mata-950);
+        background: linear-gradient(135deg, var(--capim-claro), var(--capim));
+        width: 2.1rem;
+        height: 2.1rem;
+        flex: 0 0 2.1rem;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+      }
+      .ordem li.primeiro {
+        border-color: var(--capim);
+        background: linear-gradient(
+          135deg,
+          #fff8e9,
+          var(--papel)
+        );
+      }
+      .ordem .etiqueta {
+        margin-left: auto;
+        font-size: 0.68rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--capim-escuro);
+      }
+
+      /* animação de revelação (estilo leitura de rifa) */
+      @keyframes revela {
+        0% {
+          opacity: 0;
+          transform: translateY(14px) scale(0.96);
+        }
+        60% {
+          opacity: 1;
+          transform: translateY(-3px) scale(1.01);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+      .revela {
+        animation: revela 0.45s cubic-bezier(0.22, 0.9, 0.32, 1.2) both;
+        animation-delay: var(--d, 0ms);
+      }
+
+      /* distribuição por rodada */
+      .rodada {
+        border: 1px solid var(--borda);
+        border-radius: var(--raio);
+        overflow: hidden;
+        margin-bottom: 1rem;
+        background: var(--papel);
+      }
+      .rodada h3 {
+        font-family: "Fraunces", serif;
+        font-weight: 700;
+        font-size: 1.02rem;
+        background: #f4f8f5;
+        padding: 0.65rem 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+      .rodada h3 .dir {
+        font-family: "Space Grotesk", sans-serif;
+        font-weight: 500;
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--texto-suave);
+      }
+      .rodada ul {
+        list-style: none;
+      }
+      .rodada li {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        flex-wrap: wrap;
+        padding: 0.6rem 1rem;
+        border-top: 1px solid var(--borda);
+        font-size: 0.93rem;
+      }
+      .rodada li .quem {
+        color: var(--mata-800);
+        font-weight: 600;
+      }
+      .rodada.incompleta {
+        border-style: dashed;
+        border-color: #d99a8d;
+      }
+
+      footer {
+        text-align: center;
+        color: var(--texto-suave);
+        font-size: 0.8rem;
+        margin-top: 3rem;
+        border-top: 1px solid var(--borda);
+        padding-top: 1.4rem;
+      }
+      footer .cadeado {
+        color: var(--capim);
+      }
+
+      /* acessibilidade: respeitar prefers-reduced-motion */
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+        }
+      }
+      @media (max-width: 480px) {
+        .pagina {
+          padding: 1.4rem 0.85rem 3rem;
+        }
+        .acoes button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="pagina">
+      <header>
+        <span class="selo">Condomínio Sossego</span>
+        <h1>Sorteio dos <em>feriados</em></h1>
+        <p class="sub">
+          A ordem é sorteada ao vivo e as datas são distribuídas em
+          <strong>snake draft</strong>: na primeira rodada, seguimos a ordem
+          sorteada; na segunda, começamos pelo último e voltamos até o
+          primeiro. A direção continua alternando a cada rodada, para
+          equilibrar as escolhas e não dar vantagem a quem foi sorteado em
+          primeiro lugar. Esse método é conhecido e utilizado em ligas de
+          fantasy sports, formação de equipes, jogos de tabuleiro e
+          distribuições de turnos, datas ou outros itens entre participantes.
+        </p>
+      </header>
+
+      <main>
+        <section class="painel">
+          <label class="titulo-campo" for="cotistas">Cotistas</label>
+          <p class="dica">Um nome por linha — exatamente 10.</p>
+          <textarea
+            id="cotistas"
+            rows="10"
+            spellcheck="false"
+            placeholder="Ana&#10;Bruno&#10;Carla&#10;…"
+          ></textarea>
+        </section>
+
+        <section class="painel">
+          <label class="titulo-campo" for="datas"
+            >Datas / feriados a distribuir</label
+          >
+          <p class="dica">
+            Um por linha. Pré-preenchido com datas, feriados e pontos
+            facultativos comuns — edite à vontade (adicione o ano, vésperas
+            etc.).
+          </p>
+          <textarea id="datas" rows="10" spellcheck="false">
+Réveillon (1º de janeiro)
+Carnaval (segunda e terça-feira)
+Sexta-feira Santa
+Tiradentes (21 de abril)
+Dia do Trabalho (1º de maio)
+Corpus Christi
+Independência (7 de setembro)
+Nossa Senhora Aparecida (12 de outubro)
+Finados (2 de novembro)
+Natal (25 de dezembro)</textarea
+          >
+        </section>
+
+        <div class="alerta" id="alerta" role="alert" hidden></div>
+
+        <div class="acoes">
+          <button type="button" class="btn-principal" id="btn-sortear">
+            Sortear ordem e distribuir
+          </button>
+        </div>
+
+        <p id="status-sorteio" class="sr-only" aria-live="polite"></p>
+
+        <div id="resultados" hidden>
+          <h2 class="secao-titulo" id="titulo-resultados" tabindex="-1">
+            Ordem sorteada
+          </h2>
+          <ol class="ordem" id="lista-ordem"></ol>
+
+          <h2 class="secao-titulo">Distribuição por rodada</h2>
+          <div class="aviso-rodada" id="aviso-incompleta" hidden></div>
+          <div id="rodadas"></div>
+        </div>
+      </main>
+
+      <footer>
+        <p>
+          <span class="cadeado">⬥</span> Todo o processamento acontece no seu
+          navegador: nenhum nome ou data é enviado a qualquer servidor. O
+          sorteio usa <code>crypto.getRandomValues</code> (aleatoriedade
+          criptograficamente segura) com o algoritmo Fisher-Yates.
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        var $ = function (id) {
+          return document.getElementById(id);
+        };
+        var elCotistas = $("cotistas"),
+          elDatas = $("datas"),
+          elAlerta = $("alerta"),
+          btnSortear = $("btn-sortear"),
+          resultados = $("resultados"),
+          tituloResultados = $("titulo-resultados"),
+          statusSorteio = $("status-sorteio"),
+          listaOrdem = $("lista-ordem"),
+          avisoInc = $("aviso-incompleta"),
+          elRodadas = $("rodadas");
+
+        var consultaMovimento = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        );
+        var reduzMovimento = consultaMovimento.matches;
+        var STAGGER_MS = 260;
+
+        function atualizarPreferenciaMovimento(evento) {
+          reduzMovimento = evento.matches;
+        }
+        if (consultaMovimento.addEventListener) {
+          consultaMovimento.addEventListener(
+            "change",
+            atualizarPreferenciaMovimento,
+          );
+        } else {
+          consultaMovimento.addListener(atualizarPreferenciaMovimento);
+        }
+
+        /* Lê textarea: linhas não vazias, sem espaços extras */
+        function lerLinhas(textarea) {
+          return textarea.value
+            .split(/\r?\n/)
+            .map(function (l) {
+              return l.trim();
+            })
+            .filter(function (l) {
+              return l.length > 0;
+            });
+        }
+
+        function mostrarAlerta(msg) {
+          elAlerta.textContent = msg;
+          elAlerta.hidden = false;
+        }
+        function limparAlerta() {
+          elAlerta.hidden = true;
+          elAlerta.textContent = "";
+        }
+
+        /* Fisher-Yates com crypto.getRandomValues — sem Math.random.
+     Amostragem por rejeição para eliminar viés de módulo. */
+        function sortearEmbaralhar(arr) {
+          var copia = arr.slice();
+          var buf = new Uint32Array(1);
+          for (var i = copia.length - 1; i > 0; i--) {
+            var limite = Math.floor(0x100000000 / (i + 1)) * (i + 1);
+            var r;
+            do {
+              crypto.getRandomValues(buf);
+              r = buf[0];
+            } while (r >= limite);
+            var j = r % (i + 1);
+            var tmp = copia[i];
+            copia[i] = copia[j];
+            copia[j] = tmp;
+          }
+          return copia;
+        }
+
+        /* Cria elemento com texto seguro (textContent — nunca innerHTML com dados do usuário) */
+        function el(tag, classe, texto) {
+          var e = document.createElement(tag);
+          if (classe) e.className = classe;
+          if (texto != null) e.textContent = texto;
+          return e;
+        }
+
+        function renderizarOrdem(ordem) {
+          listaOrdem.innerHTML = "";
+          ordem.forEach(function (nome, i) {
+            var li = el("li", i === 0 ? "primeiro" : "", null);
+            li.appendChild(el("span", "nome", nome));
+            if (i === 0)
+              li.appendChild(el("span", "etiqueta", "escolhe primeiro"));
+            if (!reduzMovimento) {
+              li.classList.add("revela");
+              li.style.setProperty("--d", i * STAGGER_MS + "ms");
+            }
+            listaOrdem.appendChild(li);
+          });
+        }
+
+        /* Snake draft: rodada 1 na ordem, rodada 2 invertida, etc. */
+        function distribuir(ordem, datas) {
+          var rodadas = [];
+          datas.forEach(function (data, k) {
+            var r = Math.floor(k / ordem.length);
+            var posNaOrdem =
+              r % 2 === 0
+                ? k % ordem.length
+                : ordem.length - 1 - (k % ordem.length);
+            if (!rodadas[r]) rodadas[r] = [];
+            rodadas[r].push({ cotista: ordem[posNaOrdem], data: data });
+          });
+          return rodadas;
+        }
+
+        function renderizarRodadas(rodadas, totalPorRodada) {
+          elRodadas.innerHTML = "";
+          rodadas.forEach(function (escolhas, r) {
+            var invertida = r % 2 === 1;
+            var incompleta = escolhas.length < totalPorRodada;
+            var secao = el(
+              "section",
+              "rodada" + (incompleta ? " incompleta" : ""),
+              null,
+            );
+            var h3 = el("h3", null, null);
+            h3.appendChild(
+              el(
+                "span",
+                null,
+                "Rodada " + (r + 1) + (incompleta ? " (incompleta)" : ""),
+              ),
+            );
+            h3.appendChild(
+              el(
+                "span",
+                "dir",
+                invertida ? "↩ ordem invertida" : "→ ordem sorteada",
+              ),
+            );
+            secao.appendChild(h3);
+            var ul = el("ul", null, null);
+            escolhas.forEach(function (e) {
+              var li = el("li", null, null);
+              li.appendChild(el("span", "quem", e.cotista));
+              li.appendChild(el("span", null, e.data));
+              ul.appendChild(li);
+            });
+            secao.appendChild(ul);
+            if (!reduzMovimento) {
+              secao.classList.add("revela");
+              secao.style.setProperty(
+                "--d",
+                totalPorRodada * STAGGER_MS + 300 + r * 180 + "ms",
+              );
+            }
+            elRodadas.appendChild(secao);
+          });
+        }
+
+        function executarSorteio() {
+          limparAlerta();
+          statusSorteio.textContent = "";
+
+          var cotistas = lerLinhas(elCotistas);
+          var datas = lerLinhas(elDatas);
+
+          if (cotistas.length !== 10) {
+            mostrarAlerta(
+              "É preciso ter exatamente 10 cotistas (encontrei " +
+                cotistas.length +
+                "). Um nome por linha.",
+            );
+            elCotistas.focus();
+            return;
+          }
+          if (datas.length === 0) {
+            mostrarAlerta(
+              "Adicione ao menos uma data/feriado para distribuir.",
+            );
+            elDatas.focus();
+            return;
+          }
+
+          var ordem = sortearEmbaralhar(cotistas);
+          var rodadas = distribuir(ordem, datas);
+
+          resultados.hidden = false;
+          renderizarOrdem(ordem);
+
+          if (datas.length % 10 !== 0) {
+            avisoInc.textContent =
+              "Atenção: " +
+              datas.length +
+              " data(s) para 10 cotistas — a última rodada ficará incompleta (" +
+              (datas.length % 10) +
+              " escolha(s)). Quem estiver no fim da fila nessa rodada não recebe data.";
+            avisoInc.hidden = false;
+          } else {
+            avisoInc.hidden = true;
+          }
+
+          renderizarRodadas(rodadas, 10);
+          btnSortear.textContent = "Sortear novamente";
+          statusSorteio.textContent =
+            "Sorteio concluído. " +
+            ordem[0] +
+            " escolhe primeiro. " +
+            rodadas.length +
+            (rodadas.length === 1
+              ? " rodada foi gerada."
+              : " rodadas foram geradas.");
+          tituloResultados.focus({ preventScroll: true });
+          resultados.scrollIntoView({
+            behavior: reduzMovimento ? "auto" : "smooth",
+            block: "start",
+          });
+        }
+
+        btnSortear.addEventListener("click", executarSorteio);
+      })();
+    </script>
+  </body>
+</html>
